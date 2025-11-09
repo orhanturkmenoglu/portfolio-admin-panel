@@ -39,7 +39,13 @@
 
 ### 1. Backend
 ```bash
-git clone <backend-repo-url>
-cd backend
+git clone https://github.com/orhanturkmenoglu/portfolio-service.git
+cd portfolio-service
 ./mvnw clean install
 ./mvnw spring-boot:run
+
+```
+### 2. Frontend
+```bash
+npm install
+npm start
