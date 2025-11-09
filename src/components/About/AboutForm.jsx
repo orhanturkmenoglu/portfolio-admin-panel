@@ -60,7 +60,7 @@ const AboutForm = () => {
     <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] bg-gray-100 dark:bg-gray-900 px-4 cursor-pointer">
       <div className="w-full max-w-xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 transition-colors duration-300">
         <h2 className="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100 text-center border-b pb-3">
-          📝 Update About Section
+          📝  About Section Form
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
