@@ -57,7 +57,7 @@ const AboutForm = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] bg-gray-100 dark:bg-gray-900 px-4">
+    <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] bg-gray-100 dark:bg-gray-900 px-4 cursor-pointer">
       <div className="w-full max-w-xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 transition-colors duration-300">
         <h2 className="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100 text-center border-b pb-3">
           📝 Update About Section
@@ -106,9 +106,8 @@ const AboutForm = () => {
             <InputEmoji
               value={formData.icon}
               onChange={(value) => {
-                setFormData({ ...formData, icon: value });
+                setFormData((prev) => ({ ...prev, icon: value })); // prev ile merge
               }}
-              cleanOnEnter
               placeholder="e.g., fa-user"
               required
               className="w-full px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-100 outline-none transition-all duration-200"
@@ -135,11 +134,18 @@ const AboutForm = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold text-lg shadow-lg transition-all duration-300"
+            className="w-full py-3 rounded-xl 
+            bg-gradient-to-r from-indigo-500
+             to-purple-500
+              hover:from-indigo-600
+               hover:to-purple-600
+                text-white font-semibold 
+                text-lg shadow-lg transition-all duration-300
+                curspor-pointer"
           >
             {loading ? (
               <>
-                <LoaderCircle size={16} className="animate-spin h-5" />
+                <LoaderCircle className="animate-spin h-5 w-5 text-white" />
                 Saving...
               </>
             ) : (
