@@ -5,12 +5,12 @@ const Sidebar = ({ isOpen, onClose }) => {
   const [activeItem, setActiveItem] = useState("Dashboard");
 
   const menuItems = [
-    { id: "dashboard", label: "Dashboard",href:"/", icon: "📊" },
-    { id: "about", label: "About", href: "/abouts",icon: "👤" },
-    { id: "projects", label: "Projects",href: "/projects", icon: "💼" },
-    { id: "skills", label: "Skills",href: "/skills", icon: "🎯" },
-    { id: "experience", label: "Experience",href: "/works", icon: "📈" },
-    { id: "settings", label: "Settings",href: "/settings", icon: "⚙️" },
+    { id: "dashboard", label: "Dashboard", href: "/", icon: "📊" },
+    { id: "about", label: "About", href: "/abouts", icon: "👤" },
+    { id: "projects", label: "Projects", href: "/projects", icon: "💼" },
+    { id: "skills", label: "Skills", href: "/skills", icon: "🎯" },
+    { id: "experience", label: "Experience", href: "/works", icon: "📈" },
+    { id: "settings", label: "Settings", href: "/settings", icon: "⚙️" },
   ];
 
   const handleItemClick = (item) => {
@@ -34,13 +34,14 @@ const Sidebar = ({ isOpen, onClose }) => {
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-16 left-0 h-[calc(100vh-4rem)] 
-          bg-white dark:bg-gray-900 
-          border-r border-gray-200 dark:border-gray-800
-          w-64 transform transition-transform duration-300 ease-in-out z-40
-          ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
-          overflow-y-auto
-        `}
+    fixed top-16 left-0 h-[calc(100vh-4rem)] 
+    bg-white dark:bg-gray-900 
+    border-r border-gray-200 dark:border-gray-800
+    w-64 transform transition-transform duration-300 ease-in-out 
+    z-[9999]  /* 🔥 z-index artırıldı */
+    ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+    overflow-y-auto
+  `}
       >
         <nav className="p-4 space-y-2">
           {menuItems.map((item) => (

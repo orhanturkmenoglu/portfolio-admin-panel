@@ -4,14 +4,13 @@ import { DarkModeProvider } from "./contexts/DarkModeContext";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
-import MainContent from './components/MainContent';
 import AboutForm from "./components/About/AboutForm";
 import ProjectForm from "./components/Project/ProjectForm";
 import SkillForm from "./components/Skill/SkillForm";
 import WorkForm from "./components/Work/WorkForm";
-import SettingsForm from "./components/Setting/SettingsDashboard";
 import SettingsDashboard from "./components/Setting/SettingsDashboard";
 import Dashboard from "./components/Dashboard/Dashboard";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -34,6 +33,7 @@ function App() {
         <div className="flex flex-1">
           <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
           <main className="flex-1 p-6">
+            <Toaster/>
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/abouts" element={<AboutForm />} />
@@ -41,7 +41,6 @@ function App() {
                 <Route path="/skills" element={<SkillForm />} />
               <Route path="/works" element={<WorkForm />} />
               <Route path="/settings" element={<SettingsDashboard />} />
-            
             </Routes>
           </main>
         </div>

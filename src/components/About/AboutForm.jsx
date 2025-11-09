@@ -1,51 +1,73 @@
+import axios from "axios";
 import React, { useState } from "react";
+import { addAbout, API_ENDPOINTS, BASE_URL } from "../../utils/apiEndpoint";
+import toast from "react-hot-toast";
+import { LoaderCircle } from "lucide-react";
+import InputEmoji from "react-input-emoji";
 
 const AboutForm = () => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     icon: "",
-    color: "",
+    color: "#6b5b95",
   });
 
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
+  // Handle input change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    console.log(e.target.value);
   };
 
+  // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setSuccess(false);
-
     try {
-      // Backend API örneği
-      // await axios.post("/api/about", formData);
-
-      setTimeout(() => {
-        setLoading(false);
-        setSuccess(true);
-      }, 1000);
-    } catch (err) {
+      const response = await addAbout(formData);
+      if (response.status === 201) {
+        console.log("Response successfully:", response.data);
+        toast.success("About section saved successfully! 🎉");
+        setFormData({
+          title: "",
+          description: "",
+          icon: "",
+          color: "#6b5b95",
+        });
+      } else {
+        toast.info("Request completed but returned an unexpected response.");
+      }
+    } catch (error) {
+      console.error("Connection error:", error);
+      if (error.response) {
+        toast.error(
+          error.response.data.message ||
+            "An error occurred while saving your About information!"
+        );
+      } else {
+        toast.error(
+          "Unable to connect to the server. Please check your internet connection."
+        );
+      }
+    } finally {
       setLoading(false);
-      console.error("Error submitting form:", err);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 px-4">
+    <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] bg-gray-100 dark:bg-gray-900 px-4">
       <div className="w-full max-w-xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 transition-colors duration-300">
         <h2 className="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100 text-center border-b pb-3">
-          📝 Hakkımda Bölümünü Güncelle
+          📝 Update About Section
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Title */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-              Başlık (Title)
+              Title
             </label>
             <input
               type="text"
@@ -53,7 +75,7 @@ const AboutForm = () => {
               maxLength={100}
               value={formData.title}
               onChange={handleChange}
-              placeholder="Örn: About Me"
+              placeholder="e.g., About Me"
               required
               className="w-full px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-100 outline-none transition-all duration-200"
             />
@@ -62,7 +84,7 @@ const AboutForm = () => {
           {/* Description */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-              Açıklama (Description)
+              Description
             </label>
             <textarea
               name="description"
@@ -70,7 +92,7 @@ const AboutForm = () => {
               value={formData.description}
               onChange={handleChange}
               rows={5}
-              placeholder="Kendini kısaca tanıt..."
+              placeholder="Briefly introduce yourself..."
               required
               className="w-full px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-100 outline-none resize-none transition-all duration-200"
             />
@@ -79,14 +101,15 @@ const AboutForm = () => {
           {/* Icon */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-              İkon (FontAwesome Class)
+              Icon (FontAwesome Class)
             </label>
-            <input
-              type="text"
-              name="icon"
+            <InputEmoji
               value={formData.icon}
-              onChange={handleChange}
-              placeholder="Örn: fa-user"
+              onChange={(value) => {
+                setFormData({ ...formData, icon: value });
+              }}
+              cleanOnEnter
+              placeholder="e.g., fa-user"
               required
               className="w-full px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-100 outline-none transition-all duration-200"
             />
@@ -95,16 +118,16 @@ const AboutForm = () => {
           {/* Color */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-              Renk (Color)
+              Color
             </label>
             <input
-              type="text"
+              type="color"
               name="color"
               value={formData.color}
               onChange={handleChange}
-              placeholder="Örn: blue"
+              placeholder="e.g., blue"
               required
-              className="w-full px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-100 outline-none transition-all duration-200"
+              className="w-20 h-10 p-0 border-none rounded-lg cursor-pointer shadow-sm"
             />
           </div>
 
@@ -114,15 +137,15 @@ const AboutForm = () => {
             disabled={loading}
             className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold text-lg shadow-lg transition-all duration-300"
           >
-            {loading ? "Kaydediliyor..." : "Kaydet"}
+            {loading ? (
+              <>
+                <LoaderCircle size={16} className="animate-spin h-5" />
+                Saving...
+              </>
+            ) : (
+              <>Saved</>
+            )}
           </button>
-
-          {/* Success Message */}
-          {success && (
-            <p className="text-green-500 dark:text-green-400 text-center font-semibold mt-2 animate-pulse">
-              ✅ Bilgiler başarıyla kaydedildi!
-            </p>
-          )}
         </form>
       </div>
     </div>
