@@ -26,3 +26,18 @@ export const addAbout= async(formData)=>{
       console.error("Connection error:", error);
     } 
 }
+
+
+export const addSkill = async(formData)=>{
+  try{
+     const response = await axios.post(
+        `${BASE_URL + API_ENDPOINTS.SKILL}`,
+        formData,
+        {
+          headers: { "Content-Type": "application/json" },
+        });
+        return response.data;
+      }catch(error){
+      console.error("Connection error:", error);
+      }
+  }

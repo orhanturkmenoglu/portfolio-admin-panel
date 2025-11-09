@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+import InputEmoji from "react-input-emoji";
+import { addSkill } from "../../utils/apiEndpoint";
+import { toast } from "react-hot-toast";
+import { LoaderCircle } from "lucide-react";
 
 const SkillForm = () => {
   const [formData, setFormData] = useState({
@@ -9,7 +13,6 @@ const SkillForm = () => {
   });
 
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -34,41 +37,49 @@ const SkillForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setSuccess(false);
 
     try {
-      // API call örneği
-      // await axios.post("/api/skills", formData);
+      const response = await addSkill(formData);
 
-      setTimeout(() => {
-        setLoading(false);
-        setSuccess(true);
-      }, 1000);
+      if (response.status === 201) {
+        toast.success("✅ Skill added successfully!");
+        setFormData({
+          title: "",
+          icon: "",
+          description: "",
+          tags: [""],
+        });
+      } else {
+        toast.error("❌ Failed to add skill. Please try again.");
+      }
+      console.log("Response successfully skill :",response.data);
     } catch (err) {
-      console.error(err);
+      console.error("Error adding skill:", err);
+      toast.error("🚨 Something went wrong. Please try again.");
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4 ">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4 cursor-pointer">
       <div className="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-6 md:p-10 transition-colors duration-300">
         <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-gray-100 mb-8 border-b pb-3">
-          🛠️ Skill Ekle / Düzenle
+          🛠️ Skill Form
         </h2>
 
         <form className="space-y-6" onSubmit={handleSubmit}>
           {/* Title */}
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">
-              Skill Başlığı
+              Skill Title
             </label>
             <input
               type="text"
               name="title"
               value={formData.title}
               onChange={handleChange}
-              placeholder="Örn: React"
+              placeholder="e.g., React"
               required
               className="w-full px-5 py-3 rounded-2xl border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-100 outline-none shadow-sm transition-all duration-200"
             />
@@ -77,14 +88,12 @@ const SkillForm = () => {
           {/* Icon */}
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">
-              Skill İkonu (FontAwesome)
+              Skill Icon (FontAwesome)
             </label>
-            <input
-              type="text"
-              name="icon"
+            <InputEmoji
               value={formData.icon}
-              onChange={handleChange}
-              placeholder="fa-react"
+              onChange={(value) => setFormData((prev) => ({ ...prev, icon: value }))}
+              placeholder="e.g., fa-user"
               required
               className="w-full px-5 py-3 rounded-2xl border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-100 outline-none shadow-sm transition-all duration-200"
             />
@@ -93,14 +102,14 @@ const SkillForm = () => {
           {/* Description */}
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">
-              Açıklama
+              Description
             </label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
               rows={4}
-              placeholder="Skill ile ilgili kısa açıklama"
+              placeholder="Short description about the skill"
               required
               className="w-full px-5 py-3 rounded-2xl border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-100 outline-none shadow-sm resize-none transition-all duration-200"
             />
@@ -109,7 +118,7 @@ const SkillForm = () => {
           {/* Tags */}
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">
-              Skill Etiketleri
+              Skill Tags
             </label>
             <div className="flex flex-wrap gap-2">
               {formData.tags.map((tag, idx) => (
@@ -121,7 +130,7 @@ const SkillForm = () => {
                     type="text"
                     value={tag}
                     onChange={(e) => handleTagChange(idx, e.target.value)}
-                    placeholder="Örn: Frontend"
+                    placeholder="e.g., Frontend"
                     required
                     className="bg-transparent outline-none w-20 sm:w-32 text-sm text-gray-800 dark:text-gray-100"
                   />
@@ -141,7 +150,7 @@ const SkillForm = () => {
                 onClick={addTag}
                 className="px-4 py-2 bg-indigo-500 text-white rounded-2xl hover:bg-indigo-600 transition-all text-sm shadow-sm"
               >
-                + Etiket
+                + Add Tag
               </button>
             </div>
           </div>
@@ -150,16 +159,17 @@ const SkillForm = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold text-lg shadow-lg transition-all duration-300"
+            className="w-full cursor-pointer py-3 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold text-lg shadow-lg transition-all duration-300"
           >
-            {loading ? "Kaydediliyor..." : "Kaydet"}
+            {loading ?(
+              <>
+                <LoaderCircle className="animate-spin h-5 w-5 text-white" />
+                Saving...
+              </>
+            ):<>
+               Saved
+            </>}
           </button>
-
-          {success && (
-            <p className="text-green-500 dark:text-green-400 text-center font-semibold mt-3 animate-pulse">
-              ✅ Skill başarıyla kaydedildi!
-            </p>
-          )}
         </form>
       </div>
     </div>
