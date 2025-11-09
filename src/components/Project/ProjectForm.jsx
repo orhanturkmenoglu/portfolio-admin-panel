@@ -1,14 +1,19 @@
-import React, { useState } from "react";
+import axios from "axios";
+import { Upload } from "lucide-react";
+import React, { useRef, useState } from "react";
 
 const ProjectForm = () => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    image: "",
     tech: [""],
+    image: "",
     demo: "",
     code: "",
   });
+
+  const inputRef = useRef(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -17,13 +22,28 @@ const ProjectForm = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleImageChange = (e) => {
+    e.preventDefault();
+    const file = e.target.files[0];
+    if (file) {
+      setFormData({ ...formData, image: file });
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setFormData({ ...formData, image: null });
+    setPreviewUrl(null);
+  };
+
   const handleArrayChange = (index, value) => {
     const newArray = [...formData.tech];
     newArray[index] = value;
     setFormData({ ...formData, tech: newArray });
   };
 
-  const addTechField = () => setFormData({ ...formData, tech: [...formData.tech, ""] });
+  const addTechField = () =>
+    setFormData({ ...formData, tech: [...formData.tech, ""] });
   const removeTechField = (index) => {
     const newArray = [...formData.tech];
     newArray.splice(index, 1);
@@ -36,13 +56,32 @@ const ProjectForm = () => {
     setSuccess(false);
 
     try {
-      // Example API call
-      // await axios.post("/api/projects", formData);
+      const data = new FormData();
+      data.append("title", formData.title);
+      data.append("description", formData.description);
+      data.append("demo", formData.demo);
+      data.append("code", formData.code);
+      formData.tech.forEach((t, idx) => data.append(`tech[${idx}]`, t));
+      if (formData.image) data.append("image", formData.image);
 
-      setTimeout(() => {
-        setLoading(false);
-        setSuccess(true);
-      }, 800);
+      const response = await axios.post("/api/projects", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log(response.data);
+      setSuccess(true);
+      setLoading(false);
+      // reset form
+      setFormData({
+        title: "",
+        description: "",
+        tech: [""],
+        image: null,
+        demo: "",
+        code: "",
+      });
+      setPreviewUrl(null);
     } catch (err) {
       console.error(err);
       setLoading(false);
@@ -57,6 +96,7 @@ const ProjectForm = () => {
         </h2>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
+          {/* Title */}
           <div>
             <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-200">
               Project Title
@@ -72,6 +112,7 @@ const ProjectForm = () => {
             />
           </div>
 
+          {/* Description */}
           <div>
             <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-200">
               Description
@@ -87,27 +128,58 @@ const ProjectForm = () => {
             />
           </div>
 
+          {/* Image Upload */}
           <div>
             <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-200">
-              Image Upload
+              Upload Image
             </label>
-            <input
-              type="file"
-              name="image"
-              value={formData.image}
-              onChange={handleChange}
-              placeholder="https://example.com/image.jpg"
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-100 outline-none shadow-sm text-base transition-all duration-200"
-            />
+            <div className="flex items-center gap-4">
+              {!previewUrl ? (
+                <button
+                  type="button"
+                  onClick={() => inputRef.current.click()}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-md"
+                >
+                  <Upload size={18} /> Upload
+                </button>
+              ) : (
+                <div className="relative w-24 h-24">
+                  <img
+                    src={previewUrl}
+                    alt="Project"
+                    className="w-full h-full rounded-full object-cover shadow-md"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="absolute bottom-0 right-0 w-8 h-8 flex items-center justify-center 
+                      bg-red-500 hover:bg-red-600 text-white rounded-full shadow-md transition"
+                  >
+                    <Trash size={18} />
+                  </button>
+                </div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                ref={inputRef}
+                onChange={handleImageChange}
+                className="hidden"
+              />
+            </div>
           </div>
 
+          {/* Technologies */}
           <div>
             <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-200">
               Technologies
             </label>
             <div className="flex flex-wrap gap-3">
               {formData.tech.map((tech, idx) => (
-                <div key={idx} className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 px-3 py-1.5 rounded-full shadow-sm">
+                <div
+                  key={idx}
+                  className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 px-3 py-1.5 rounded-full shadow-sm"
+                >
                   <input
                     type="text"
                     value={tech}
@@ -117,18 +189,27 @@ const ProjectForm = () => {
                     className="bg-transparent outline-none w-24 text-sm sm:w-32 text-gray-800 dark:text-gray-100"
                   />
                   {formData.tech.length > 1 && (
-                    <button type="button" onClick={() => removeTechField(idx)} className="text-red-500 hover:text-red-600 text-sm">
+                    <button
+                      type="button"
+                      onClick={() => removeTechField(idx)}
+                      className="text-red-500 hover:text-red-600 text-sm"
+                    >
                       ✕
                     </button>
                   )}
                 </div>
               ))}
-              <button type="button" onClick={addTechField} className="px-3 py-1.5 bg-indigo-500 text-white rounded-full hover:bg-indigo-600 text-sm shadow-sm">
+              <button
+                type="button"
+                onClick={addTechField}
+                className="px-3 py-1.5 bg-indigo-500 text-white rounded-full hover:bg-indigo-600 text-sm shadow-sm"
+              >
                 + Tech
               </button>
             </div>
           </div>
 
+          {/* Demo & Code Links */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label className="block text-base font-medium mb-2 text-gray-700 dark:text-gray-200">
@@ -160,6 +241,7 @@ const ProjectForm = () => {
             </div>
           </div>
 
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
